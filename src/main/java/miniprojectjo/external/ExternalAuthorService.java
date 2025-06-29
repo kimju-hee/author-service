@@ -3,33 +3,31 @@ package miniprojectjo.external;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-// import reactor.core.publisher.Mono;
+import javax.annotation.PostConstruct;
 
 @Service
 public class ExternalAuthorService {
 
-    private final WebClient webClient;
+    @Value("${api.url.author}")
+    private String baseUrl;
 
-    public ExternalAuthorService(@Value("${external.author.url}") String baseUrl) {
+    private WebClient webClient;
+
+    @PostConstruct
+    public void init() {
         this.webClient = WebClient.builder()
             .baseUrl(baseUrl)
             .build();
     }
 
-    public boolean author(AuthorQuery query) {
-        try {
-            webClient.post()
-                .uri("/notify-disapproval")
-                .bodyValue(query)
-                .retrieve()
-                .bodyToMono(Void.class)
-                .block(); // 동기식
+    public void author(AuthorQuery query) {
+        webClient.post()
+            .uri("/external/author/callback") // 예시 경로
+            .bodyValue(query)
+            .retrieve()
+            .bodyToMono(Void.class)
+            .block();
 
-            return true;
-
-        } catch (Exception e) {
-            System.err.println("외부 연동 실패: " + e.getMessage());
-            return false;
-        }
+        System.out.println("외부 서비스 호출 완료: " + query);
     }
 }
