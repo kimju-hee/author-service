@@ -1,21 +1,25 @@
 package miniprojectjo.domain;
 
-import miniprojectjo.domain.AuthorRegistered;
+import miniprojectjo.external.AuthorQuery;
+import miniprojectjo.external.ExternalAuthorService;
+// import miniprojectjo.domain.AuthorRegistered;
 import miniprojectjo.AuthorApplication;
 import javax.persistence.*;
-import java.util.List;
+
 import lombok.Data;
+
+import java.util.List;
+// import lombok.Data;
 import java.util.Date;
-import java.time.LocalDate;
-import java.util.Map;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Collections;
+// import java.time.LocalDate;
+// import java.util.Map;
+// import com.fasterxml.jackson.databind.ObjectMapper;
+// import java.util.Collections;
 
 
 @Entity
 @Table(name="Author_table")
 @Data
-
 //<<< DDD / Aggregate Root
 public class Author  {
 
@@ -24,25 +28,39 @@ public class Author  {
     
     
     
-private Long id;    
-    
-    
-private String email;    
-    
-    
-private String authorName;    
-    
-    
-private String introduction;    
-    
-    
-private String feturedWorks;    
-    
+    private Long id;    
+
+    @Column(nullable = false)    
+    private String email;    
+        
+    private String authorName;    
+        
+    private String introduction;    
+        
+    private String featuredWorks;    
+        
     @ElementCollection
-private List<Portfolio> portfolios;    
+    private List<Portfolio> portfolios;    
     
-    
-private Boolean isApprove;
+    @Column(nullable = false)
+    private Boolean isApprove;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdAt;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedAt;
+
+    @PrePersist
+    public void onPrePersist() {
+        this.createdAt = new Date();
+        this.updatedAt = new Date();
+    }
+
+    @PreUpdate
+    public void onPreUpdate() {
+        this.updatedAt = new Date();
+    }
 
     @PostPersist
     public void onPostPersist(){
@@ -61,31 +79,30 @@ private Boolean isApprove;
 
 
 
-//<<< Clean Arch / Port Method
-    public void approveAuthor(ApproveAuthorCommand approveAuthorCommand){
-        
-        //implement business logic here:
-        
-
+    //<<< Clean Arch / Port Method
+        public void approveAuthor(ApproveAuthorCommand cmd){
+        this.isApprove = true;
+        repository().save(this);
 
         AuthorApproved authorApproved = new AuthorApproved(this);
         authorApproved.publishAfterCommit();
     }
-//>>> Clean Arch / Port Method
-//<<< Clean Arch / Port Method
-    public void disapproveAuthor(DisapproveAuthorCommand disapproveAuthorCommand){
-        
-        //implement business logic here:
-        
+    //>>> Clean Arch / Port Method
+    //<<< Clean Arch / Port Method
+    public void disapproveAuthor(DisapproveAuthorCommand cmd){
+        this.isApprove = false;
+        repository().save(this);
 
-        miniprojectjo.external.AuthorQuery authorQuery = new miniprojectjo.external.AuthorQuery();
-        // authorQuery.set??()        
-          = AuthorApplication.applicationContext
-            .getBean(miniprojectjo.external.Service.class)
-            .author(authorQuery);
+        AuthorQuery authorQuery = new AuthorQuery();
+        authorQuery.setAuthorId(this.id);
+        authorQuery.setReason("요건 미달로 비승인");
 
-        AuthorDisApproved authorDisApproved = new AuthorDisApproved(this);
-        authorDisApproved.publishAfterCommit();
+        ExternalAuthorService externalService =
+            AuthorApplication.applicationContext.getBean(ExternalAuthorService.class);
+        externalService.author(authorQuery);
+
+        AuthorDisApproved event = new AuthorDisApproved(this);
+        event.publishAfterCommit();
     }
 //>>> Clean Arch / Port Method
 
