@@ -1,16 +1,15 @@
 package miniprojectjo.domain;
 
-// import java.time.LocalDate;
 import java.util.*;
 import lombok.*;
-// import miniprojectjo.domain.*;
 import miniprojectjo.infra.AbstractEvent;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-//<<< DDD / Domain Event
 @Data
 @ToString
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true) // 예기치 않은 필드 무시
 public class AuthorRegistered extends AbstractEvent {
 
     private Long id;
@@ -32,4 +31,3 @@ public class AuthorRegistered extends AbstractEvent {
         this.isApprove = aggregate.getIsApprove();
     }
 }
-//>>> DDD / Domain Event
