@@ -5,7 +5,7 @@ metadata:
   labels:
     app: author
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: author
