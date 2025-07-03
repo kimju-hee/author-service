@@ -30,4 +30,9 @@ public class AuthorRegistered extends AbstractEvent {
         this.portfolios = aggregate.getPortfolios();
         this.isApprove = aggregate.getIsApprove();
     }
+
+    @Override
+    public String getEventType() {
+        return "AuthorRegistered";
+    }
 }
