@@ -23,4 +23,16 @@ sudo apt-get install -y azure-cli
 echo "[3] Helm 설치"
 curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
-echo "모든 초기 설정 완료!"
+echo "[4] kubectl 설치"
+if ! command -v kubectl &> /dev/null; then
+  echo "kubectl not found. Installing..."
+
+  KUBECTL_VERSION=$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)
+  curl -LO "https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+
+  chmod +x kubectl
+  sudo mv kubectl /usr/local/bin/
+  echo "kubectl ${KUBECTL_VERSION} 설치 완료"
+else
+  echo "kubectl 이미 설치됨"
+fi
