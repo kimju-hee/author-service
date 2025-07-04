@@ -1,12 +1,12 @@
 server:
-  port: 8080
+  port: 8082
 
 spring:
   application:
     name: author
 
   profiles:
-    active: docker
+    active: default
 
   jpa:
     properties:
@@ -37,9 +37,14 @@ spring:
           destination: miniprojectjo
           contentType: application/json
 
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
 api:
   url:
-    author: http://author:8080
+    author: http://author:8082
 
 logging:
   level:
