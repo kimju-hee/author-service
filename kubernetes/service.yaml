@@ -5,7 +5,7 @@ metadata:
   labels:
     app: author
 spec:
-  type: LoadBalancer   
+  type: ClusterIP
   ports:
     - port: 8082
       targetPort: 8082
